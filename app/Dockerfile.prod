@@ -1,0 +1,65 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+# RUN apk update \
+#    && apk add postgresql-dev gcc python3-dev musl-dev
+
+################## GDAL ##############################
+
+RUN apt-get update &&\
+    apt-get install gdal-bin python3-gdal python3-pip binutils libproj-dev libgdal-dev build-essential libssl-dev libffi-dev python-dev python-virtualenv libpq-dev python3-dev -y
+
+RUN apt install -y netcat
+######################################################
+
+# lint
+RUN pip install --upgrade pip
+RUN pip install flake8
+COPY . .
+RUN flake8 --ignore=E501,F401 .
+
+# install dependencies
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN groupadd app && useradd -g app app
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+RUN mkdir $APP_HOME/mediafiles
+WORKDIR $APP_HOME
+
+# copy entrypoint-prod.sh
+COPY ./entrypoint.prod.sh $APP_HOME
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+# run entrypoint.prod.sh
+ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]
