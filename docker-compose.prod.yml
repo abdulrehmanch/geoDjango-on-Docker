@@ -1,24 +1,25 @@
-version: '3.3'
+version: '3.8'
 
 services:
   web:
     build:
-      context: ./app
+      context: ./GeoDjangoDocker
       dockerfile: Dockerfile.prod
-    command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn GeoDjangoDocker.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/mediafiles
+      - static_volume:/usr/src/app/staticfiles
     expose:
       - 8000
     env_file:
       - ./.env.prod
+    environment:
+      - DATABASE=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
     depends_on:
       - db
   db:
-    build: ./pg12-3.0
-    ports:
-      - 5434:5432
+    image: postgis/postgis:12-3.0
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -26,14 +27,12 @@ services:
   nginx:
     build: ./nginx
     volumes:
-      - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/mediafiles
+      - static_volume:/usr/src/app/staticfiles
     ports:
-      - 82:82
+      - 1337:80
     depends_on:
       - web
 
 volumes:
   postgres_data:
   static_volume:
-  media_volume:

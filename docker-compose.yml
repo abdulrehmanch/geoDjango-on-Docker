@@ -1,15 +1,17 @@
-version: '3.7'
-
 services:
   web:
-    build: ./app
+    build: ./GeoDjangoDocker
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./app/:/usr/src/app/
+      - ./GeoDjangoDocker/:/usr/src/app/
     ports:
-      - 8000:8000
+      - "8000:8000"
     env_file:
-      - ./.env.dev
+      - ./.env
+    environment:
+      - DATABASE=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
     depends_on:
       - db
   db:

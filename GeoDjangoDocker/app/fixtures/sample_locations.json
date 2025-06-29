@@ -1,0 +1,57 @@
+[
+  {
+    "model": "app.location",
+    "pk": 1,
+    "fields": {
+      "name": "Eiffel Tower",
+      "description": "Iconic iron tower in Paris, France",
+      "point": "SRID=4326;POINT (2.2945 48.8584)",
+      "created_at": "2023-06-30T12:00:00Z",
+      "updated_at": "2023-06-30T12:00:00Z"
+    }
+  },
+  {
+    "model": "app.location",
+    "pk": 2,
+    "fields": {
+      "name": "Statue of Liberty",
+      "description": "Famous statue in New York Harbor",
+      "point": "SRID=4326;POINT (-74.0445 40.6892)",
+      "created_at": "2023-06-30T12:00:00Z",
+      "updated_at": "2023-06-30T12:00:00Z"
+    }
+  },
+  {
+    "model": "app.location",
+    "pk": 3,
+    "fields": {
+      "name": "Sydney Opera House",
+      "description": "Performing arts center in Sydney, Australia",
+      "point": "SRID=4326;POINT (151.2153 -33.8568)",
+      "created_at": "2023-06-30T12:00:00Z",
+      "updated_at": "2023-06-30T12:00:00Z"
+    }
+  },
+  {
+    "model": "app.location",
+    "pk": 4,
+    "fields": {
+      "name": "Taj Mahal",
+      "description": "Ivory-white marble mausoleum in Agra, India",
+      "point": "SRID=4326;POINT (78.0422 27.1751)",
+      "created_at": "2023-06-30T12:00:00Z",
+      "updated_at": "2023-06-30T12:00:00Z"
+    }
+  },
+  {
+    "model": "app.location",
+    "pk": 5,
+    "fields": {
+      "name": "Great Wall of China",
+      "description": "Ancient fortification in northern China",
+      "point": "SRID=4326;POINT (116.5704 40.4319)",
+      "created_at": "2023-06-30T12:00:00Z",
+      "updated_at": "2023-06-30T12:00:00Z"
+    }
+  }
+]
