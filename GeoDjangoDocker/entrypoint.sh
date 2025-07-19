@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# Wait for the database to be ready
 if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
@@ -12,11 +11,12 @@ then
     echo "PostgreSQL started"
 fi
 
-# Run migrations
-python manage.py migrate
-
-# Create superuser if needed
-# Uncomment the following lines to create a superuser automatically
-# python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin') if not User.objects.filter(username='admin').exists() else None"
-
+# Activate virtual environment
+#set -e
+#
+## Activate virtual environment
+#. /usr/src/app/venv/bin/activate
+python manage.py collectstatic --noinput
+#python manage.py makemigrations
+#python manage.py migrate
 exec "$@"

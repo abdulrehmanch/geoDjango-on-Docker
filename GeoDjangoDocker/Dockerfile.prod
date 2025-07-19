@@ -1,88 +1,49 @@
-###########
-# BUILDER #
-###########
+# Pull the official Python image
+FROM ghcr.io/osgeo/gdal:ubuntu-small-latest
 
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim as builder
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        gcc \
-        postgresql-client \
-        libpq-dev \
-        gdal-bin \
-        libgdal-dev \
-        python3-gdal \
-        binutils \
-        libproj-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set GDAL environment variables
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
-
-# Set work directory
+# Set working directory
 WORKDIR /usr/src/app
 
-# Install dependencies
+# Set environment variables to improve Python performance
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV VIRTUAL_ENV=/home/app/web/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install system packages
+RUN apt-get update && \
+    apt-get install -y python3-pip python3-venv && \
+    python3 -m venv $VIRTUAL_ENV && \
+    $VIRTUAL_ENV/bin/pip install --upgrade pip
+
+# Install Python dependencies
 COPY requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+RUN $VIRTUAL_ENV/bin/pip install --upgrade pip
+RUN $VIRTUAL_ENV/bin/pip install -r requirements.txt
+RUN $VIRTUAL_ENV/bin/pip install gunicorn
 
-#########
-# FINAL #
-#########
+################## Create a Non-Root User ###################
+RUN useradd -m -s /bin/bash app
 
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
-
-# Create directory for the app user
-RUN mkdir -p /home/app
-
-# Create the app user
-RUN groupadd -r app && useradd -r -g app app
-
-# Create appropriate directories
+################## Directory Setup ###################
 ENV HOME=/home/app
 ENV APP_HOME=/home/app/web
-RUN mkdir $APP_HOME
-RUN mkdir $APP_HOME/staticfiles
+RUN mkdir -p $APP_HOME/staticfiles $APP_HOME/mediafiles
+
 WORKDIR $APP_HOME
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-        gdal-bin \
-        python3-gdal \
-        netcat \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy wheels from builder
-COPY --from=builder /usr/src/app/wheels /wheels
-COPY --from=builder /usr/src/app/requirements.txt .
-
-# Install dependencies
-RUN pip install --upgrade pip \
-    && pip install --no-cache /wheels/*
-
-# Copy project
+# Copy project files into the container
 COPY . $APP_HOME
 
-# Make entrypoint.sh executable
-RUN chmod +x $APP_HOME/entrypoint.sh
+# Change ownership of all files to the app user
+RUN chown -R app:app $HOME
 
-# Chown all the files to the app user
-RUN chown -R app:app $APP_HOME
+COPY entrypoint.sh .
+RUN chmod +x /home/app/web/entrypoint.sh
 
-# Change to the app user
-USER app
-
-# Run entrypoint.sh
+# Set the entrypoint to our script and run cron in the foreground via CMD
 ENTRYPOINT ["/home/app/web/entrypoint.sh"]
+
+# Expose port 8000 in the container
+EXPOSE 8005
+
