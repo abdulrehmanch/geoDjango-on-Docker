@@ -44,6 +44,3 @@ RUN chmod +x /home/app/web/entrypoint.sh
 # Set the entrypoint to our script and run cron in the foreground via CMD
 ENTRYPOINT ["/home/app/web/entrypoint.sh"]
 
-# Expose port 8000 in the container
-EXPOSE 8005
-
